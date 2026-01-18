@@ -5,9 +5,13 @@ import pandas as pd
 import numpy as np
 import joblib
 import os
+import warnings
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+
+# Suppress sklearn version warnings
+warnings.filterwarnings('ignore', category=UserWarning)
 
 MODEL_PATH = 'server/model.pkl'
 DATA_PATH = 'server/sonar.csv'
@@ -32,9 +36,9 @@ def load_or_train_model():
         X = df.iloc[:, :-1]
         y = df.iloc[:, -1]
         
-        # Simple Logistic Regression
+        # Simple Logistic Regression with increased max_iter for convergence
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
-        model = LogisticRegression()
+        model = LogisticRegression(max_iter=1000, random_state=42)
         model.fit(X_train, y_train)
         
         # Save for next time
