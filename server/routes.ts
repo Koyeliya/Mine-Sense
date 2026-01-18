@@ -17,8 +17,9 @@ export async function registerRoutes(
     try {
       const { features } = api.predict.submit.input.parse(req.body);
 
-      // Run python script
-      const pythonProcess = spawn('python3', ['server/predict.py']);
+      // Run python script using virtual environment
+      const pythonPath = fs.existsSync('.venv/bin/python3') ? '.venv/bin/python3' : 'python3';
+      const pythonProcess = spawn(pythonPath, ['server/predict.py']);
       
       let dataString = '';
       let errorString = '';
