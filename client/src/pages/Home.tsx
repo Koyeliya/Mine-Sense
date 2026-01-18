@@ -46,17 +46,23 @@ export default function Home() {
       if (parsed.length !== 60 || parsed.some(isNaN)) {
         throw new Error("Invalid data format. Must be 60 comma-separated numbers.");
       }
+      
+      // Strict training distribution check: only allow values found in the sonar data (0 to 1 range, typically 4-5 decimal places)
+      if (parsed.some(n => n < 0 || n > 1)) {
+        throw new Error("Out of Distribution: Values must be between 0.0 and 1.0 as per the training protocol.");
+      }
+
       setSonarData(parsed);
       setIsDialogOpen(false);
       setCsvInput("");
       toast({
         title: "Import Successful",
-        description: "External sonar data loaded successfully.",
+        description: "Protocol-compliant sonar data loaded successfully.",
       });
     } catch (err: any) {
       toast({
         variant: "destructive",
-        title: "Import Failed",
+        title: "Protocol Violation",
         description: err.message,
       });
     }
@@ -65,8 +71,19 @@ export default function Home() {
   const updateBand = (index: number, value: string) => {
     const newValue = parseFloat(value);
     if (isNaN(newValue)) return;
+    
+    // Strict range validation for manual input
+    if (newValue < 0 || newValue > 1) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Frequency",
+        description: "Value must be between 0.0 and 1.0 (Training Protocol Constraint)",
+      });
+      return;
+    }
+
     const newData = [...sonarData];
-    newData[index] = Math.min(Math.max(newValue, 0), 1);
+    newData[index] = newValue;
     setSonarData(newData);
   };
 
@@ -150,7 +167,10 @@ export default function Home() {
 
             <div className="bg-card p-6 rounded-2xl border border-border shadow-lg space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-display text-muted-foreground uppercase tracking-wider">Manual Signal Adjustment</h3>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-display text-muted-foreground uppercase tracking-wider">Manual Signal Adjustment</h3>
+                  <p className="text-[10px] font-mono text-primary/70 italic">Protocol: Training-specific values only (0.0 - 1.0)</p>
+                </div>
                 <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">60 Channels</span>
               </div>
               <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 h-48 overflow-y-auto pr-2 custom-scrollbar">
