@@ -62,6 +62,14 @@ export default function Home() {
     }
   };
 
+  const updateBand = (index: number, value: string) => {
+    const newValue = parseFloat(value);
+    if (isNaN(newValue)) return;
+    const newData = [...sonarData];
+    newData[index] = Math.min(Math.max(newValue, 0), 1);
+    setSonarData(newData);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-body">
       <Header />
@@ -123,19 +131,44 @@ export default function Home() {
         </div>
 
         {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-auto lg:h-[500px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-auto">
           
-          {/* Left Column: Chart */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-md font-display text-muted-foreground flex items-center gap-2">
-                <ActivityIcon className="w-4 h-4 text-primary" />
-                FREQUENCY SPECTRUM VISUALIZATION
-              </h3>
+          {/* Left Column: Chart & Manual Input */}
+          <div className="flex flex-col gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-md font-display text-muted-foreground flex items-center gap-2">
+                  <ActivityIcon className="w-4 h-4 text-primary" />
+                  FREQUENCY SPECTRUM VISUALIZATION
+                </h3>
+              </div>
+              
+              <div className="h-[300px] bg-card rounded-2xl p-1 border border-border shadow-lg relative">
+                <SonarChart data={sonarData} animate={isPending} />
+              </div>
             </div>
-            
-            <div className="flex-1 min-h-[300px] bg-card rounded-2xl p-1 border border-border shadow-lg relative">
-              <SonarChart data={sonarData} animate={isPending} />
+
+            <div className="bg-card p-6 rounded-2xl border border-border shadow-lg space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-display text-muted-foreground uppercase tracking-wider">Manual Signal Adjustment</h3>
+                <span className="text-[10px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded">60 Channels</span>
+              </div>
+              <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 h-48 overflow-y-auto pr-2 custom-scrollbar">
+                {sonarData.map((val, idx) => (
+                  <div key={idx} className="flex flex-col gap-1">
+                    <label className="text-[9px] font-mono text-muted-foreground">B{idx+1}</label>
+                    <input 
+                      type="number"
+                      step="0.0001"
+                      min="0"
+                      max="1"
+                      value={val.toFixed(4)}
+                      onChange={(e) => updateBand(idx, e.target.value)}
+                      className="bg-background border border-border rounded p-1 text-[10px] font-mono text-center focus:border-primary outline-none transition-colors"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
 
             <Button 
