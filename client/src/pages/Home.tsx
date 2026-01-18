@@ -28,12 +28,23 @@ export default function Home() {
   const { mutate: predict, data: prediction, isPending } = useSubmitPrediction();
   const { toast } = useToast();
 
-  const handleRandomize = () => {
-    setSonarData(generateMockData());
-    toast({
-      title: "Data Generated",
-      description: "Random 60-band frequency data loaded into buffer.",
-    });
+  const handleRandomize = async () => {
+    try {
+      const response = await fetch('/api/samples/random');
+      if (!response.ok) throw new Error("Failed to fetch sample");
+      const data = await response.json();
+      setSonarData(data.features);
+      toast({
+        title: "Official Protocol Sample Loaded",
+        description: "A real training dataset sample has been loaded into the buffer.",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Randomize Failed",
+        description: "Could not load official sample data.",
+      });
+    }
   };
 
   const handleScan = () => {

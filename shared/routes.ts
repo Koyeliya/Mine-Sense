@@ -34,6 +34,15 @@ export const api = {
       responses: {
         200: z.array(z.custom<typeof predictions.$inferSelect>())
       }
+    },
+    randomSample: {
+      method: 'GET' as const,
+      path: '/api/samples/random',
+      responses: {
+        200: z.object({
+          features: z.array(z.number()).length(60)
+        })
+      }
     }
   }
 };
